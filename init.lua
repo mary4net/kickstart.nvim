@@ -102,7 +102,7 @@ vim.g.have_nerd_font = false
 vim.opt.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
+vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
@@ -114,9 +114,13 @@ vim.opt.showmode = false
 --  Schedule the setting after `UiEnter` because it can increase startup-time.
 --  Remove this option if you want your OS clipboard to remain independent.
 --  See `:help 'clipboard'`
-vim.schedule(function()
-  vim.opt.clipboard = 'unnamedplus'
-end)
+-- vim.schedule(function()
+--   vim.opt.clipboard = 'unnamedplus'
+-- end)
+
+-- tab/indent length
+vim.opt.shiftwidth = 2
+vim.opt.tabstop = 2
 
 -- Enable break indent
 vim.opt.breakindent = true
@@ -164,7 +168,13 @@ vim.opt.scrolloff = 10
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
+vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+
+-- NOTE: Tab management
+vim.keymap.set('n', '<C-n>', '<cmd>tabnew<CR>', { desc = 'New tab' })
+vim.keymap.set('n', '<Tab>', '<cmd>tabnext<CR>', { desc = 'Next tab' })
+vim.keymap.set('n', '<S-Tab>', '<cmd>tabprevious<CR>', { desc = 'Prev tab' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -173,12 +183,13 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 -- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
 -- or just use <C-\><C-n> to exit terminal mode
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+vim.keymap.set('n', '<C-t>', '<cmd>terminal<CR>', { desc = 'Exit terminal mode' })
 
 -- TIP: Disable arrow keys in normal mode
--- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
--- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
--- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
--- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
+vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
+vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
+vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
+vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
@@ -202,6 +213,16 @@ vim.api.nvim_create_autocmd('TextYankPost', {
     vim.highlight.on_yank()
   end,
 })
+
+-- -- recognize *ddl file and set filetype=ddl
+-- vim.api.nvim_create_autocmd('BufRead', {
+--   pattern = '*.ddl',
+--   command = 'set filetype=ddl',
+-- })
+-- vim.api.nvim_create_autocmd('BufNewFile', {
+--   pattern = '*.ddl',
+--   command = 'set filetype=ddl',
+-- })
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
@@ -253,6 +274,53 @@ require('lazy').setup({
         changedelete = { text = '~' },
       },
     },
+  },
+
+  {
+    'ojroques/nvim-osc52', -- 插件名称
+    config = function()
+      require('osc52').setup {
+        max_length = 0,
+        silent = false,
+        trim = false,
+        tmux_passthrough = false,
+      }
+
+      local function copy(lines, _)
+        require('osc52').copy(table.concat(lines, '\n'))
+      end
+
+      -- local function paste()
+      --   local content = vim.fn.getreg '+' -- 获取剪贴板内容
+      --   print('Clipboard content:', content) -- 打印剪贴板内容，调试用
+      --   if content == '' then
+      --     return {} -- 如果剪贴板为空，则返回空列表
+      --   end
+      --   return { vim.fn.split(content, '\n'), vim.fn.getregtype '+' }
+      -- end
+
+      -- local function paste()
+      --   local content = vim.fn.getreg '+' -- 获取剪贴板内容
+      --   vim.fn.setreg('+', content) -- 同步内容到系统剪贴板
+      --   return { vim.fn.split(content, '\n'), vim.fn.getregtype '+' }
+      -- end
+
+      local function paste()
+        return { vim.fn.split(vim.fn.getreg '', '\n'), vim.fn.getregtype '' }
+      end
+
+      vim.g.clipboard = {
+        name = 'osc52',
+        copy = { ['+'] = copy, ['*'] = copy },
+        paste = { ['+'] = paste, ['*'] = paste },
+      }
+
+      vim.keymap.set('n', 'y', '"+y')
+      vim.keymap.set('v', 'y', '"+y')
+      vim.keymap.set('n', 'yy', '"+yy')
+      -- vim.keymap.set('n', 'p', '"+p') -- 从系统剪贴板粘贴内容
+      -- vim.keymap.set('n', 'P', '"+P') -- 粘贴在光标前
+    end,
   },
 
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
@@ -615,8 +683,30 @@ require('lazy').setup({
       --  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
+
       local servers = {
-        -- clangd = {},
+        clangd = {
+          cmd = { 'clangd', '--compile-commands-dir=build', '--header-insertion=never' },
+          init_options = {
+            compilationDatabasePath = 'build',
+            clangdFileStatus = true,
+            fallbackFlags = { '-D_GNU_SOURCE' },
+          },
+        },
+        sqls = {
+          filetypes = { 'sql', 'ddl' },
+          root_dir = require('lspconfig.util').root_pattern('.git', 'db-schema.sql'),
+          settings = {
+            sqls = {
+              connections = {
+                {
+                  driver = 'postgresql',
+                  dataSourceName = 'host=mcsdb.utm.utoronto.ca user=xuruili password=94926 dbname=xuruili_343 sslmode=disable',
+                },
+              },
+            },
+          },
+        },
         -- gopls = {},
         -- pyright = {},
         -- rust_analyzer = {},
@@ -665,6 +755,12 @@ require('lazy').setup({
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
       require('mason-lspconfig').setup {
+        ensure_installed = {
+          'clangd',
+          'lua_ls',
+          -- 'pyright'
+        },
+        automatic_installation = true,
         handlers = {
           function(server_name)
             local server = servers[server_name] or {}
@@ -713,6 +809,7 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        sql = {},
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
