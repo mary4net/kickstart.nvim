@@ -91,7 +91,9 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
+
+-- vim.opt.guifont = 'JetBrainsMono Nerd Font:h12'
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -114,13 +116,14 @@ vim.opt.showmode = false
 --  Schedule the setting after `UiEnter` because it can increase startup-time.
 --  Remove this option if you want your OS clipboard to remain independent.
 --  See `:help 'clipboard'`
--- vim.schedule(function()
---   vim.opt.clipboard = 'unnamedplus'
--- end)
+vim.schedule(function()
+  vim.opt.clipboard = 'unnamedplus'
+end)
 
 -- tab/indent length
 vim.opt.shiftwidth = 2
 vim.opt.tabstop = 2
+-- vim.opt.softtabstop = 4
 
 -- Enable break indent
 vim.opt.breakindent = true
@@ -160,59 +163,9 @@ vim.opt.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
 
--- [[ Basic Keymaps ]]
---  See `:help vim.keymap.set()`
+-- vim.termguicolors = true
 
--- Clear highlights on search when pressing <Esc> in normal mode
---  See `:help hlsearch`
-vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
-
--- Diagnostic keymaps
-vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
-
--- NOTE: Tab management
-vim.keymap.set('n', '<C-n>', '<cmd>tabnew<CR>', { desc = 'New tab' })
-vim.keymap.set('n', '<Tab>', '<cmd>tabnext<CR>', { desc = 'Next tab' })
-vim.keymap.set('n', '<S-Tab>', '<cmd>tabprevious<CR>', { desc = 'Prev tab' })
-
--- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
--- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
--- is not what someone will guess without a bit more experience.
---
--- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
--- or just use <C-\><C-n> to exit terminal mode
-vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
-vim.keymap.set('n', '<C-t>', '<cmd>terminal<CR>', { desc = 'Exit terminal mode' })
-
--- TIP: Disable arrow keys in normal mode
-vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
-vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
-vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
-vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
-
--- Keybinds to make split navigation easier.
---  Use CTRL+<hjkl> to switch between windows
---
---  See `:help wincmd` for a list of all window commands
-vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
-
--- [[ Basic Autocommands ]]
---  See `:help lua-guide-autocommands`
-
--- Highlight when yanking (copying) text
---  Try it with `yap` in normal mode
---  See `:help vim.highlight.on_yank()`
-vim.api.nvim_create_autocmd('TextYankPost', {
-  desc = 'Highlight when yanking (copying) text',
-  group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
-  callback = function()
-    vim.highlight.on_yank()
-  end,
-})
+require 'configs.base-mappings'
 
 -- -- recognize *ddl file and set filetype=ddl
 -- vim.api.nvim_create_autocmd('BufRead', {
@@ -249,7 +202,7 @@ vim.opt.rtp:prepend(lazypath)
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
-  'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
+  { 'tpope/vim-sleuth' }, -- Detect tabstop and shiftwidth automatically
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -276,52 +229,39 @@ require('lazy').setup({
     },
   },
 
-  {
-    'ojroques/nvim-osc52', -- 插件名称
-    config = function()
-      require('osc52').setup {
-        max_length = 0,
-        silent = false,
-        trim = false,
-        tmux_passthrough = false,
-      }
-
-      local function copy(lines, _)
-        require('osc52').copy(table.concat(lines, '\n'))
-      end
-
-      -- local function paste()
-      --   local content = vim.fn.getreg '+' -- 获取剪贴板内容
-      --   print('Clipboard content:', content) -- 打印剪贴板内容，调试用
-      --   if content == '' then
-      --     return {} -- 如果剪贴板为空，则返回空列表
-      --   end
-      --   return { vim.fn.split(content, '\n'), vim.fn.getregtype '+' }
-      -- end
-
-      -- local function paste()
-      --   local content = vim.fn.getreg '+' -- 获取剪贴板内容
-      --   vim.fn.setreg('+', content) -- 同步内容到系统剪贴板
-      --   return { vim.fn.split(content, '\n'), vim.fn.getregtype '+' }
-      -- end
-
-      local function paste()
-        return { vim.fn.split(vim.fn.getreg '', '\n'), vim.fn.getregtype '' }
-      end
-
-      vim.g.clipboard = {
-        name = 'osc52',
-        copy = { ['+'] = copy, ['*'] = copy },
-        paste = { ['+'] = paste, ['*'] = paste },
-      }
-
-      vim.keymap.set('n', 'y', '"+y')
-      vim.keymap.set('v', 'y', '"+y')
-      vim.keymap.set('n', 'yy', '"+yy')
-      -- vim.keymap.set('n', 'p', '"+p') -- 从系统剪贴板粘贴内容
-      -- vim.keymap.set('n', 'P', '"+P') -- 粘贴在光标前
-    end,
-  },
+  -- ssh clipboard features
+  -- {
+  --   'ojroques/nvim-osc52', -- 插件名称
+  --   config = function()
+  --     require('osc52').setup {
+  --       max_length = 0,
+  --       silent = false,
+  --       trim = false,
+  --       tmux_passthrough = false,
+  --     }
+  --
+  --     local function copy(lines, _)
+  --       require('osc52').copy(table.concat(lines, '\n'))
+  --     end
+  --
+  --
+  --     local function paste()
+  --       return { vim.fn.split(vim.fn.getreg '', '\n'), vim.fn.getregtype '' }
+  --     end
+  --
+  --     vim.g.clipboard = {
+  --       name = 'osc52',
+  --       copy = { ['+'] = copy, ['*'] = copy },
+  --       paste = { ['+'] = paste, ['*'] = paste },
+  --     }
+  --
+  --     vim.keymap.set('n', 'y', '"+y')
+  --     vim.keymap.set('v', 'y', '"+y')
+  --     vim.keymap.set('n', 'yy', '"+yy')
+  --     -- vim.keymap.set('n', 'p', '"+p') -- 从系统剪贴板粘贴内容
+  --     -- vim.keymap.set('n', 'P', '"+P') -- 粘贴在光标前
+  --   end,
+  -- },
 
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
   --
@@ -456,7 +396,11 @@ require('lazy').setup({
         --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
         --   },
         -- },
-        -- pickers = {}
+        pickers = {
+          colorscheme = {
+            enable_preview = true,
+          },
+        },
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
@@ -584,7 +528,7 @@ require('lazy').setup({
           --  To jump back, press <C-t>.
           map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
 
-          -- Find references for the word under your cursor.
+          -- Find references for the word under your cursor.init'
           map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
 
           -- Jump to the implementation of the word under your cursor.
@@ -686,12 +630,13 @@ require('lazy').setup({
 
       local servers = {
         clangd = {
-          cmd = { 'clangd', '--compile-commands-dir=build', '--header-insertion=never' },
-          init_options = {
-            compilationDatabasePath = 'build',
-            clangdFileStatus = true,
-            fallbackFlags = { '-D_GNU_SOURCE' },
-          },
+          -- cmd = { 'clangd', '--compile-commands-dir=build', '--header-insertion=never' },
+          cmd = { 'clangd' },
+          -- init_options = {
+          --   compilationDatabasePath = 'build',
+          --   clangdFileStatus = true,
+          --   fallbackFlags = { '-D_GNU_SOURCE' },
+          -- },
         },
         sqls = {
           filetypes = { 'sql', 'ddl' },
@@ -708,7 +653,7 @@ require('lazy').setup({
           },
         },
         -- gopls = {},
-        -- pyright = {},
+        pyright = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -716,7 +661,8 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
-        -- ts_ls = {},
+        ts_ls = {},
+        eslint = {},
         --
 
         lua_ls = {
@@ -758,7 +704,10 @@ require('lazy').setup({
         ensure_installed = {
           'clangd',
           'lua_ls',
-          -- 'pyright'
+          'pyright',
+          'eslint',
+          'ts_ls',
+          'sqls',
         },
         automatic_installation = true,
         handlers = {
@@ -795,26 +744,37 @@ require('lazy').setup({
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
+        local disable_filetypes = { c = true, cpp = true, hpp = true, sql = true }
         local lsp_format_opt
         if disable_filetypes[vim.bo[bufnr].filetype] then
-          lsp_format_opt = 'never'
-        else
-          lsp_format_opt = 'fallback'
+          return false
+          --   lsp_format_opt = 'never'
+          -- else
+          --   lsp_format_opt = 'fallback'
         end
         return {
           timeout_ms = 500,
-          lsp_format = lsp_format_opt,
+          lsp_format = true,
         }
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
-        sql = {},
+        c = { 'clang-format' },
+        cpp = { 'clang-format' },
+        hpp = { 'clang-format' },
+        sql = { 'sql-formatter' },
         -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
+        python = { 'autopep8', 'isort', 'black' },
+        json = { fixjson },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
-        -- javascript = { "prettierd", "prettier", stop_after_first = true },
+        javascript = { 'prettierd', 'prettier', stop_after_first = true },
+      },
+      formatters = {
+        ['clang-format'] = {
+          prepend_args = { '--style={SortIncludes: Never}' },
+          -- prepend_args = { '--style={IndentWidth: 4, UseTab: ForIndentation, TabWidth: 4, SortIncludes: Never}' },
+        },
       },
     },
   },
@@ -945,12 +905,21 @@ require('lazy').setup({
     init = function()
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      -- any other, such as 'tokyonight-night', tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
+      vim.cmd.colorscheme 'tokyonight-day'
 
       -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
     end,
+
+    -- the background
+    opts = {
+      transparent = true,
+      styles = {
+        sidebars = 'transparent',
+        floats = 'transparent',
+      },
+    },
   },
 
   -- Highlight todo, notes, etc in comments
@@ -1022,24 +991,46 @@ require('lazy').setup({
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- place them in the correct locations.
-
+  -- {
+  --   'nvim-neo-tree/neo-tree.nvim',
+  --   branch = 'v3.x',
+  --   dependencies = {
+  --     'nvim-lua/plenary.nvim',
+  --     'nvim-tree/nvim-web-devicons', -- not strictly required, but recommended
+  --     'MunifTanjim/nui.nvim',
+  --     -- {"3rd/image.nvim", opts = {}}, -- Optional image support in preview window: See `# Preview Mode` for more information
+  --   },
+  --   window = {
+  --     position = 'left',
+  --     width = 20,
+  --     mapping_options = {
+  --       noremap = true,
+  --       nowait = true,
+  --     },
+  --   },
+  -- },
   -- NOTE: Next step on your Neovim journey: Add/Configure additional plugins for Kickstart
   --
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
-  -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
-  -- require 'kickstart.plugins.lint',
-  -- require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
-  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+  -- require 'plugins.debug',
+  require 'plugins.debugger',
+  require 'plugins.debugger.c',
+  require 'plugins.debugger.python',
+  require 'plugins.indent_line',
+  require 'plugins.lint',
+  require 'plugins.autopairs',
+  require 'plugins.neo-tree',
+  require 'plugins.nvim-window-picker',
+  require 'plugins.git',
+  -- require 'plugins.gitsigns', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
   --
-  --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- { import = 'custom.plugins' },
+  --  Uncomment the following line and add your plugins to `lua/plugins/*.lua` to get going.
+  { import = 'plugins' },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!

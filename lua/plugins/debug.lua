@@ -1,7 +1,6 @@
 -- debug.lua
 --
 -- Shows how to use the DAP plugin to debug your code.
---
 -- Primarily focused on configuring the debugger for Go, but can
 -- be extended to other languages as well. That's why it's called
 -- kickstart.nvim and not kitchen-sink.nvim ;)
@@ -34,21 +33,21 @@ return {
       desc = 'Debug: Start/Continue',
     },
     {
-      '<F1>',
-      function()
-        require('dap').step_into()
-      end,
-      desc = 'Debug: Step Into',
-    },
-    {
-      '<F2>',
+      '<F10>',
       function()
         require('dap').step_over()
       end,
       desc = 'Debug: Step Over',
     },
     {
-      '<F3>',
+      '<F11>',
+      function()
+        require('dap').step_into()
+      end,
+      desc = 'Debug: Step Into',
+    },
+    {
+      '<F12>',
       function()
         require('dap').step_out()
       end,
@@ -80,6 +79,12 @@ return {
   config = function()
     local dap = require 'dap'
     local dapui = require 'dapui'
+
+    vim.keymap.set('n', '<Leader>lp', function()
+      dap.set_breakpoint(nil, nil, vim.fn.input 'Log point message: ')
+    end, { desc = 'Debugger [L]og [P]oint' })
+    vim.keymap.set('n', '<Leader>dr', dap.repl.open, { desc = '[D]ebugger [R]epl' })
+    vim.keymap.set('n', '<Leader>dl', dap.run_last, { desc = '[D]ebugger run [L]ast' })
 
     require('mason-nvim-dap').setup {
       -- Makes a best effort to setup the various debuggers with
