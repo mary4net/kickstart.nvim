@@ -776,6 +776,11 @@ require('lazy').setup({
           -- prepend_args = { '--style={IndentWidth: 4, UseTab: ForIndentation, TabWidth: 4, SortIncludes: Never}' },
         },
       },
+      formatters = {
+        ['clang-format'] = {
+          prepend_args = { '--style={IndentWidth: 4, UseTab: ForIndentation, TabWidth: 4, SortIncludes: Never}' },
+        },
+      },
     },
   },
 
