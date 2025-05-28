@@ -163,9 +163,13 @@ vim.opt.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
 
+<<<<<<< HEAD
 -- vim.termguicolors = true
 
 require 'configs.base-mappings'
+=======
+require 'custom.configs.base-mappings'
+>>>>>>> 55d4f1b23978714f53d3927740ef4a9ccd7cf96c
 
 -- -- recognize *ddl file and set filetype=ddl
 -- vim.api.nvim_create_autocmd('BufRead', {
@@ -744,7 +748,11 @@ require('lazy').setup({
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
+<<<<<<< HEAD
         local disable_filetypes = { c = true, cpp = true, hpp = true, sql = true }
+=======
+        local disable_filetypes = { c = true, cpp = true, sql = true }
+>>>>>>> 55d4f1b23978714f53d3927740ef4a9ccd7cf96c
         local lsp_format_opt
         if disable_filetypes[vim.bo[bufnr].filetype] then
           return false
@@ -761,11 +769,17 @@ require('lazy').setup({
         lua = { 'stylua' },
         c = { 'clang-format' },
         cpp = { 'clang-format' },
+<<<<<<< HEAD
         hpp = { 'clang-format' },
         sql = { 'sql-formatter' },
         -- Conform can also run multiple formatters sequentially
         python = { 'autopep8', 'isort', 'black' },
         json = { fixjson },
+=======
+        sql = {},
+        -- Conform can also run multiple formatters sequentially
+        python = { 'isort', 'black' },
+>>>>>>> 55d4f1b23978714f53d3927740ef4a9ccd7cf96c
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         javascript = { 'prettierd', 'prettier', stop_after_first = true },
@@ -774,6 +788,11 @@ require('lazy').setup({
         ['clang-format'] = {
           prepend_args = { '--style={SortIncludes: Never}' },
           -- prepend_args = { '--style={IndentWidth: 4, UseTab: ForIndentation, TabWidth: 4, SortIncludes: Never}' },
+        },
+      },
+      formatters = {
+        ['clang-format'] = {
+          prepend_args = { '--style={IndentWidth: 4, UseTab: ForIndentation, TabWidth: 4, SortIncludes: Never}' },
         },
       },
       formatters = {
@@ -1019,6 +1038,7 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
+<<<<<<< HEAD
   -- require 'plugins.debug',
   require 'plugins.debugger',
   require 'plugins.debugger.c',
@@ -1030,6 +1050,17 @@ require('lazy').setup({
   require 'plugins.nvim-window-picker',
   require 'plugins.git',
   -- require 'plugins.gitsigns', -- adds gitsigns recommend keymaps
+=======
+  -- require 'kickstart.plugins.debug',
+  require 'custom.plugins.debugger',
+  require 'custom.plugins.debugger.c',
+  -- require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.lint',
+  require 'kickstart.plugins.autopairs',
+  require 'kickstart.plugins.neo-tree',
+  require 'kickstart.plugins.nvim-window-picker',
+  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+>>>>>>> 55d4f1b23978714f53d3927740ef4a9ccd7cf96c
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
