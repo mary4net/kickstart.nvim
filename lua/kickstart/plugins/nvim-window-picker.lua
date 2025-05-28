@@ -12,7 +12,6 @@ return {
       -- when you go to window selection mode, status bar will show one of
       -- following letters on them so you can use that letter to select the window
       selection_chars = 'ABCDEFG',
-<<<<<<< HEAD:lua/plugins/nvim-window-picker.lua
 
       -- following filters are only applied when you are using the default filter
       -- defined by this plugin. If you pass in a function to "filter_func"
@@ -50,8 +49,6 @@ return {
         -- ignored
         file_name_contains = {},
       },
-=======
->>>>>>> 55d4f1b23978714f53d3927740ef4a9ccd7cf96c:lua/kickstart/plugins/nvim-window-picker.lua
     }
   end,
 }
