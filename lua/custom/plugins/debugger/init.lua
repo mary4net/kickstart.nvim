@@ -1,14 +1,9 @@
--- debug.lua
---
--- Shows how to use the DAP plugin to debug your code.
--- Primarily focused on configuring the debugger for Go, but can
--- be extended to other languages as well. That's why it's called
--- kickstart.nvim and not kitchen-sink.nvim ;)
-
 return {
   -- NOTE: Yes, you can install new plugins here!
   'mfussenegger/nvim-dap',
+
   -- NOTE: And you can specify dependencies as well
+  event = 'VeryLazy',
   dependencies = {
     -- Creates a beautiful debugger UI
     'rcarriga/nvim-dap-ui',
@@ -17,74 +12,36 @@ return {
     'nvim-neotest/nvim-nio',
 
     -- Installs the debug adapters for you
-    'mason-org/mason.nvim',
+    'williamboman/mason.nvim',
     'jay-babu/mason-nvim-dap.nvim',
+  },
 
-    -- Add your own debuggers here
-    'leoluz/nvim-dap-go',
-  },
-  keys = {
-    -- Basic debugging keymaps, feel free to change to your liking!
-    {
-      '<F5>',
-      function()
-        require('dap').continue()
-      end,
-      desc = 'Debug: Start/Continue',
-    },
-    {
-      '<F10>',
-      function()
-        require('dap').step_over()
-      end,
-      desc = 'Debug: Step Over',
-    },
-    {
-      '<F11>',
-      function()
-        require('dap').step_into()
-      end,
-      desc = 'Debug: Step Into',
-    },
-    {
-      '<F12>',
-      function()
-        require('dap').step_out()
-      end,
-      desc = 'Debug: Step Out',
-    },
-    {
-      '<leader>b',
-      function()
-        require('dap').toggle_breakpoint()
-      end,
-      desc = 'Debug: Toggle Breakpoint',
-    },
-    {
-      '<leader>B',
-      function()
-        require('dap').set_breakpoint(vim.fn.input 'Breakpoint condition: ')
-      end,
-      desc = 'Debug: Set Breakpoint',
-    },
-    -- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
-    {
-      '<F7>',
-      function()
-        require('dapui').toggle()
-      end,
-      desc = 'Debug: See last session result.',
-    },
-  },
   config = function()
     local dap = require 'dap'
     local dapui = require 'dapui'
 
+    vim.keymap.set('n', '<F4>', function()
+      vim.g.is_run_last = true
+      dap.run_last()
+    end, { desc = '[D]ebugger run [L]ast' })
+
+    vim.keymap.set('n', '<F5>', function()
+      vim.g.is_run_last = false
+      dap.continue()
+    end, { desc = 'Debug: Start/Ctn' })
+    -- vim.keymap.set('n', '<F4>', dap.run_last, { desc = '[D]ebugger run [L]ast' })
+    -- vim.keymap.set('n', '<F5>', dap.continue, { desc = 'Debug: Start/Ctn' })
+    vim.keymap.set('n', '<F6>', dap.step_into, { desc = 'Debug: Step Into' })
+    vim.keymap.set('n', '<F7>', dap.step_over, { desc = 'Debug: Step Over' })
+    vim.keymap.set('n', '<F8>', dap.step_out, { desc = 'Debug: Step Out' })
+    vim.keymap.set('n', '<F9>', dap.terminate, { desc = 'Debug: Terminate' })
+    vim.keymap.set('n', '<Leader>b', dap.toggle_breakpoint, { desc = 'Debugger Toggle [b]reakpoint' })
+    vim.keymap.set('n', '<Leader>B', dap.set_breakpoint, { desc = 'Debugger Set [B]reakpoint' })
+    vim.keymap.set('n', '<F3>', dapui.toggle, { desc = 'Debug: See last session result' })
+    vim.keymap.set('n', '<Leader>dr', dap.repl.open, { desc = '[D]ebugger [R]epl' })
     vim.keymap.set('n', '<Leader>lp', function()
       dap.set_breakpoint(nil, nil, vim.fn.input 'Log point message: ')
     end, { desc = 'Debugger [L]og [P]oint' })
-    vim.keymap.set('n', '<Leader>dr', dap.repl.open, { desc = '[D]ebugger [R]epl' })
-    vim.keymap.set('n', '<Leader>dl', dap.run_last, { desc = '[D]ebugger run [L]ast' })
 
     require('mason-nvim-dap').setup {
       -- Makes a best effort to setup the various debuggers with
@@ -142,12 +99,12 @@ return {
     dap.listeners.before.event_exited['dapui_config'] = dapui.close
 
     -- Install golang specific config
-    require('dap-go').setup {
-      delve = {
-        -- On Windows delve must be run attached or it crashes.
-        -- See https://github.com/leoluz/nvim-dap-go/blob/main/README.md#configuring
-        detached = vim.fn.has 'win32' == 0,
-      },
-    }
+    -- require('dap-go').setup {
+    --   delve = {
+    --     -- On Windows delve must be run attached or it crashes.
+    --     -- See https://github.com/leoluz/nvim-dap-go/blob/main/README.md#configuring
+    --     detached = vim.fn.has 'win32' == 0,
+    --   },
+    -- }
   end,
 }
