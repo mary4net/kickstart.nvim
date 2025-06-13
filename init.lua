@@ -167,9 +167,19 @@ vim.opt.scrolloff = 10
 --  See `:help hlsearch`
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
--- Diagnostic keymaps
+-- NOTE: Diagnostic keymaps
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+
+-- NOTE: save/restore session
+local file = vim.fn.getcwd() .. '/Session.vim'
+local save_session = '<cmd>mksession! ' .. file .. '<CR><cmd>echo "session saved"<CR>'
+local restore_session = '<cmd>source ' .. file .. '<CR><cmd>echo "session restored"<CR>'
+
+vim.keymap.set('n', '<C-s>', save_session, { desc = 'save session' })
+vim.keymap.set('t', '<C-s>', save_session, { desc = 'save session' })
+vim.keymap.set('n', '<C-a>', restore_session, { desc = 'restore session' })
+vim.keymap.set('t', '<C-a>', restore_session, { desc = 'restore session' })
 
 -- NOTE: Tab management
 vim.keymap.set('n', '<C-n>', '<cmd>tabnew<CR>', { desc = 'New tab' })
@@ -707,7 +717,7 @@ require('lazy').setup({
             },
           },
         },
-        -- gopls = {},
+        gopls = {},
         -- pyright = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -758,6 +768,7 @@ require('lazy').setup({
         ensure_installed = {
           'clangd',
           'lua_ls',
+          'gopls',
           -- 'pyright'
         },
         automatic_installation = true,
@@ -1029,11 +1040,12 @@ require('lazy').setup({
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
   -- require 'kickstart.plugins.debug',
-  require 'kickstart.plugins.indent_line',
-  -- require 'kickstart.plugins.lint',
+  -- require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
   require 'kickstart.plugins.neo-tree',
   require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+  require 'custom.plugins.render-markdown', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
